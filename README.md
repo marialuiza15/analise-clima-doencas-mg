@@ -10,13 +10,12 @@ Investigar a relação entre variáveis climáticas (temperatura, umidade relati
 - **Óbitos por doenças crônicas**  
   Fonte: [Portal de Dados Abertos do Estado de Minas Gerais](https://dados.mg.gov.br/dataset/dados_doencas_cronicas_ses)  
   - 14 arquivos `.csv`
-  - Mais de 1 milhão de registros (2010–2023)
+  - 1.003.906 registros (2010–2023)
 
 - **Dados Climáticos (INMET)**  
   Fonte: [Banco de Dados Meteorológicos para Ensino e Pesquisa – INMET](https://bdmep.inmet.gov.br/#)  
-  - 154 estações meteorológicas em MG
-  - Temperatura média diária, umidade relativa do ar
-  - Período: 2010–2023
+  - 68 estações meteorológicas em MG (68 arquivos `.csv`)
+  - 347.616 registros (2010–2023)
 
 ## 🛠 Técnicas Utilizadas
 
