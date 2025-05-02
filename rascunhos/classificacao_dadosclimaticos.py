@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 
-
 def classificar_umidade(umidade):
     """
     Classifica a umidade relativa do ar conforme as categorias definidas:
@@ -197,4 +196,4 @@ def processar_diretorio_climatico(diretorio_entrada, diretorio_saida=None):
                 print(f"Erro ao processar {arquivo}: {str(e)}")
 
 #usar para processar todos os arquivos:
-processar_diretorio_climatico(r"analise-clima-doencas-mg/dados_clima_mg", r"analise-clima-doencas-mg/dados_processados")
+processar_diretorio_climatico(r"analise-clima-doencas-mg/dados_clima_mg", r"analise-clima-doencas-mg/rascunhos/arquivos")
