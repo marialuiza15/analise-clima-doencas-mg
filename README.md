@@ -1,4 +1,3 @@
-# analise-clima-doencas-mg
 
 Projeto desenvolvido para a disciplina **INF1032 - Introdução à Ciência dos Dados** (2025.1), turmas 3WA PUC-Rio.
 
