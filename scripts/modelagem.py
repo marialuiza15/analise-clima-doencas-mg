@@ -5,14 +5,16 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
 
 def treinar_modelos(df):
-    df = df.sort_values('data')
-    X = df[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']]
+    df = df.sort_values('data').copy()
+    X = df[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
     y = df['risco_obito']
 
-    for col in X.select_dtypes(include='category').columns:
-        X[col] = LabelEncoder().fit_transform(X[col])
+    for col in X.columns:
+        if X[col].dtype == 'object' or str(X[col].dtype).startswith('category'):
+            X[col] = X[col].astype(str)  # Converta para string primeiro
+            X[col] = LabelEncoder().fit_transform(X[col])
 
-    y = LabelEncoder().fit_transform(y)
+    y = LabelEncoder().fit_transform(y.astype(str))
 
     tscv = TimeSeriesSplit(n_splits=5)
     modelo = RandomForestClassifier()
