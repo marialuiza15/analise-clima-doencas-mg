@@ -29,23 +29,32 @@ def treinar_modelos(df):
         print(f"\nFold {i+1}")
         print(classification_report(y_test, y_pred))
 
-def testar_com_dados_futuros(modelo_treinado, df_teste):
-    df_teste = df_teste.sort_values('data').copy()
+def treinar_modelo_final(df_treino, df_teste):
+    # Preparação
+    df_treino = df_treino.sort_values('data')
+    df_teste = df_teste.sort_values('data')
+
+    X_train = df_treino[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
+    y_train = df_treino['risco_obito']
 
     X_test = df_teste[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
-    y_test = df_teste['risco_obito'].astype(str)
+    y_test = df_teste['risco_obito']
 
-    # Codificação das variáveis categóricas
-    for col in X_test.columns:
-        if X_test[col].dtype == 'object' or str(X_test[col].dtype).startswith('category'):
-            X_test[col] = X_test[col].astype(str)
-            X_test[col] = LabelEncoder().fit_transform(X_test[col])  # Para produção real, você deveria usar o mesmo encoder do treino
+    # Encoding
+    for col in X_train.columns:
+        if X_train[col].dtype == 'object' or str(X_train[col].dtype).startswith('category'):
+            le = LabelEncoder()
+            X_train[col] = le.fit_transform(X_train[col].astype(str))
+            X_test[col] = le.transform(X_test[col].astype(str))  # usa mesmo encoder
 
-    y_test_enc = LabelEncoder().fit_transform(y_test)  # Mesma observação: idealmente, use o mesmo encoder do treino
+    le_y = LabelEncoder()
+    y_train = le_y.fit_transform(y_train.astype(str))
+    y_test = le_y.transform(y_test.astype(str))
 
-    # Previsão
-    y_pred = modelo_treinado.predict(X_test)
+    # Modelo
+    modelo = RandomForestClassifier(random_state=42)
+    modelo.fit(X_train, y_train)
+    y_pred = modelo.predict(X_test)
 
-    # Avaliação
-    print("\n📊 Avaliação com dados de 2023:")
-    print(classification_report(y_test_enc, y_pred))
+    relatorio = classification_report(y_test, y_pred, target_names=le_y.classes_)
+    return modelo, relatorio
