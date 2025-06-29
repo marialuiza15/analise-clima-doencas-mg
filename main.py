@@ -43,7 +43,7 @@ df_geral_2023 = unindo_clima_saude(df_clima_2023, CAMINHO_SAUDE, 2023)
 # resultado.to_csv("resultado_uniao_2010.csv", index=False, encoding="utf-8") # cCaso precise ver o df completo
 
 # Junta todos os anos de 2010 a 2022
-df_treino = pd.concat([
+df_concat = pd.concat([
     engenharia_de_features(df_geral_ano)
     for df_geral_ano in [
         df_geral_2010, df_geral_2011, df_geral_2012, df_geral_2013,
@@ -55,6 +55,7 @@ df_treino = pd.concat([
 
 # Teste com 2023
 df_teste = engenharia_de_features(df_geral_2023)
+df_treino = engenharia_de_features(df_concat)
 
 print("\n== Validação cruzada com TimeSeriesSplit nos anos anteriores ==")
 treinar_modelos(df_treino)
