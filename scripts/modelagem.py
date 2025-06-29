@@ -14,13 +14,14 @@ def treinar_e_testar(df_treino, df_teste):
     X_test = df_teste[features].copy()
     y_test = df_teste['risco_obito']
 
-    # Codificação
+    # Codificação das features categóricas
     for col in X_train.columns:
         if X_train[col].dtype == 'object':
             le = LabelEncoder()
             X_train[col] = le.fit_transform(X_train[col].astype(str))
             X_test[col] = le.transform(X_test[col].astype(str))
 
+    # Codifica o y
     le_y = LabelEncoder()
     y_train = le_y.fit_transform(y_train)
     y_test = le_y.transform(y_test)
@@ -30,32 +31,17 @@ def treinar_e_testar(df_treino, df_teste):
     y_pred = modelo.predict(X_test)
 
     # Relatório
-    print("\nRelatório de Classificação (ano de teste):")
+    print("\nRelatório de Classificação (2023):")
     print(classification_report(y_test, y_pred, target_names=le_y.classes_))
 
-    # Matriz de Confusão
+    # Matriz de confusão
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(6, 5))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
                 xticklabels=le_y.classes_, yticklabels=le_y.classes_)
-    plt.title("Matriz de Confusão - Teste 2023")
     plt.xlabel("Previsto")
     plt.ylabel("Real")
-    plt.tight_layout()
-    plt.show()
-
-    # Distribuição real x prevista
-    plt.figure(figsize=(8, 4))
-    sns.countplot(x=le_y.inverse_transform(y_test), color='blue', label='Real')
-    sns.countplot(x=le_y.inverse_transform(y_pred), color='red', alpha=0.5, label='Previsto')
-    plt.title("Distribuição de Classes (Real x Previsto)")
-    plt.legend()
-    plt.show()
-
-    # Importância das features
-    plt.figure(figsize=(6, 4))
-    sns.barplot(x=modelo.feature_importances_, y=features)
-    plt.title("Importância das Variáveis")
+    plt.title("Matriz de Confusão - Teste em 2023")
     plt.tight_layout()
     plt.show()
 
