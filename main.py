@@ -1,4 +1,3 @@
-
 from scripts.limpeza import *
 from scripts.features import *
 from scripts.modelagem import *
@@ -42,23 +41,39 @@ df_geral_2023 = unindo_clima_saude(df_clima_2023, CAMINHO_SAUDE, 2023)
 
 # resultado.to_csv("resultado_uniao_2010.csv", index=False, encoding="utf-8") # cCaso precise ver o df completo
 
-# Junta todos os anos de 2010 a 2022
-df_concat = pd.concat([
-    engenharia_de_features(df_geral_ano)
-    for df_geral_ano in [
-        df_geral_2010, df_geral_2011, df_geral_2012, df_geral_2013,
-        df_geral_2014, df_geral_2015, df_geral_2016, df_geral_2017,
-        df_geral_2018, df_geral_2019, df_geral_2020, df_geral_2021,
-        df_geral_2022
-    ]
+# Junta dados de treino de 2010 até 2022
+df_treino_total = pd.concat([
+    engenharia_de_features(df_geral_2010),
+    engenharia_de_features(df_geral_2011),
+    engenharia_de_features(df_geral_2012),
+    engenharia_de_features(df_geral_2013),
+    engenharia_de_features(df_geral_2014),
+    engenharia_de_features(df_geral_2015),
+    engenharia_de_features(df_geral_2016),
+    engenharia_de_features(df_geral_2017),
+    engenharia_de_features(df_geral_2018),
+    engenharia_de_features(df_geral_2019),
+    engenharia_de_features(df_geral_2020),
+    engenharia_de_features(df_geral_2021),
+    engenharia_de_features(df_geral_2022)
 ], ignore_index=True)
 
-# Teste com 2023
-df_teste = engenharia_de_features(df_geral_2023)
-df_treino = engenharia_de_features(df_concat)
+# Treina e obtém o modelo
+modelo_final = RandomForestClassifier()
+df_treino_total = df_treino_total.sort_values('data').copy()
+X = df_treino_total[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
+y = df_treino_total['risco_obito'].astype(str)
 
-print("\n== Validação cruzada com TimeSeriesSplit nos anos anteriores ==")
-treinar_modelos(df_treino)
-print(df_teste)
-# Avaliação em 2023
-modelo_final = avaliar_em_ano_futuro(df_treino, df_teste)
+# Codifica
+for col in X.columns:
+    if X[col].dtype == 'object':
+        X[col] = LabelEncoder().fit_transform(X[col].astype(str))
+y = LabelEncoder().fit_transform(y)
+
+modelo_final.fit(X, y)
+
+# Prepara os dados de 2023
+df_teste_2023 = engenharia_de_features(df_geral_2023)
+
+# Testa com dados futuros
+testar_com_dados_futuros(modelo_final, df_teste_2023)
