@@ -41,39 +41,20 @@ df_geral_2023 = unindo_clima_saude(df_clima_2023, CAMINHO_SAUDE, 2023)
 
 # resultado.to_csv("resultado_uniao_2010.csv", index=False, encoding="utf-8") # cCaso precise ver o df completo
 
-# Junta dados de treino de 2010 até 2022
-df_treino_total = pd.concat([
-    engenharia_de_features(df_geral_2010),
-    engenharia_de_features(df_geral_2011),
-    engenharia_de_features(df_geral_2012),
-    engenharia_de_features(df_geral_2013),
-    engenharia_de_features(df_geral_2014),
-    engenharia_de_features(df_geral_2015),
-    engenharia_de_features(df_geral_2016),
-    engenharia_de_features(df_geral_2017),
-    engenharia_de_features(df_geral_2018),
-    engenharia_de_features(df_geral_2019),
-    engenharia_de_features(df_geral_2020),
-    engenharia_de_features(df_geral_2021),
-    engenharia_de_features(df_geral_2022)
+# Junta todos os anos anteriores (treino)
+df_treino = pd.concat([
+    engenharia_de_features(df_geral_ano)
+    for df_geral_ano in [
+        df_geral_2010, df_geral_2011, df_geral_2012, df_geral_2013,
+        df_geral_2014, df_geral_2015, df_geral_2016, df_geral_2017,
+        df_geral_2018, df_geral_2019, df_geral_2020, df_geral_2021,
+        df_geral_2022
+    ]
 ], ignore_index=True)
 
-# Treina e obtém o modelo
-modelo_final = RandomForestClassifier()
-df_treino_total = df_treino_total.sort_values('data').copy()
-X = df_treino_total[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
-y = df_treino_total['risco_obito'].astype(str)
+# Dados de teste (ano mais recente)
+df_teste = engenharia_de_features(df_geral_2023)
 
-# Codifica
-for col in X.columns:
-    if X[col].dtype == 'object':
-        X[col] = LabelEncoder().fit_transform(X[col].astype(str))
-y = LabelEncoder().fit_transform(y)
-
-modelo_final.fit(X, y)
-
-# Prepara os dados de 2023
-df_teste_2023 = engenharia_de_features(df_geral_2023)
-
-# Testa com dados futuros
-testar_com_dados_futuros(modelo_final, df_teste_2023)
+# Treinar com todos os dados anteriores, testar em 2023
+modelo, relatorio = treinar_modelo_final(df_treino, df_teste)
+print(relatorio)
