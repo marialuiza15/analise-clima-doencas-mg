@@ -55,5 +55,9 @@ df_treino = pd.concat([
 
 # Teste com 2023
 df_teste = engenharia_de_features(df_geral_2023)
+
+print("\n== Validação cruzada com TimeSeriesSplit nos anos anteriores ==")
+treinar_modelos(df_treino)
 print(df_teste)
-modelo_final = treinar_e_testar(df_treino, df_teste)
+# Avaliação em 2023
+modelo_final = avaliar_em_ano_futuro(df_treino, df_teste)
