@@ -1,30 +1,62 @@
-import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import classification_report
 
-def treinar_modelos(df):
-    df = df.sort_values('data').copy()
-    X = df[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
-    y = df['risco_obito']
+def treinar_e_testar(df_treino, df_teste):
+    df_treino = df_treino.sort_values('data')
+    df_teste = df_teste.sort_values('data')
 
-    for col in X.columns:
-        if X[col].dtype == 'object' or str(X[col].dtype).startswith('category'):
-            X[col] = X[col].astype(str)  # Converta para string primeiro
-            X[col] = LabelEncoder().fit_transform(X[col])
+    features = ['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']
+    X_train = df_treino[features].copy()
+    y_train = df_treino['risco_obito']
+    X_test = df_teste[features].copy()
+    y_test = df_teste['risco_obito']
 
-    y = LabelEncoder().fit_transform(y.astype(str))
+    # Codificação
+    for col in X_train.columns:
+        if X_train[col].dtype == 'object':
+            le = LabelEncoder()
+            X_train[col] = le.fit_transform(X_train[col].astype(str))
+            X_test[col] = le.transform(X_test[col].astype(str))
 
-    tscv = TimeSeriesSplit(n_splits=5)
-    modelo = RandomForestClassifier()
+    le_y = LabelEncoder()
+    y_train = le_y.fit_transform(y_train)
+    y_test = le_y.transform(y_test)
 
-    for i, (train_idx, test_idx) in enumerate(tscv.split(X)):
-        X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
-        y_train, y_test = y[train_idx], y[test_idx]
+    modelo = RandomForestClassifier(random_state=42)
+    modelo.fit(X_train, y_train)
+    y_pred = modelo.predict(X_test)
 
-        modelo.fit(X_train, y_train)
-        y_pred = modelo.predict(X_test)
+    # Relatório
+    print("\nRelatório de Classificação (ano de teste):")
+    print(classification_report(y_test, y_pred, target_names=le_y.classes_))
 
-        print(f"\nFold {i+1}")
-        print(classification_report(y_test, y_pred))
+    # Matriz de Confusão
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=le_y.classes_, yticklabels=le_y.classes_)
+    plt.title("Matriz de Confusão - Teste 2023")
+    plt.xlabel("Previsto")
+    plt.ylabel("Real")
+    plt.tight_layout()
+    plt.show()
+
+    # Distribuição real x prevista
+    plt.figure(figsize=(8, 4))
+    sns.countplot(x=le_y.inverse_transform(y_test), color='blue', label='Real')
+    sns.countplot(x=le_y.inverse_transform(y_pred), color='red', alpha=0.5, label='Previsto')
+    plt.title("Distribuição de Classes (Real x Previsto)")
+    plt.legend()
+    plt.show()
+
+    # Importância das features
+    plt.figure(figsize=(6, 4))
+    sns.barplot(x=modelo.feature_importances_, y=features)
+    plt.title("Importância das Variáveis")
+    plt.tight_layout()
+    plt.show()
+
+    return modelo
