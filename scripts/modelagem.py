@@ -67,5 +67,6 @@ def treinar_modelo_final(df_treino, df_teste):
         y_test, y_pred,
         labels=range(len(le_y.classes_)),
         target_names=le_y.classes_
+        zero_division=0
     )
     return modelo, relatorio
