@@ -41,6 +41,30 @@ df_geral_2023 = unindo_clima_saude(df_clima_2023, CAMINHO_SAUDE, 2023)
 
 # resultado.to_csv("resultado_uniao_2010.csv", index=False, encoding="utf-8") # cCaso precise ver o df completo
 
-df_features_2010 = engenharia_de_features(df_geral_2010)
-print(df_features_2010)
-treinar_modelos(df_features_2010)
+#df_features_2010 = engenharia_de_features(df_geral_2010)
+#print(df_features_2010)
+#treinar_modelos(df_features_2010)
+
+# Junta todos os anos anteriores (treino)
+df_treino = pd.concat([
+    engenharia_de_features(df_geral_ano)
+    for df_geral_ano in [
+        df_geral_2010, df_geral_2011, df_geral_2012, df_geral_2013,
+        df_geral_2014, df_geral_2015, df_geral_2016, df_geral_2017,
+        df_geral_2018, df_geral_2019, df_geral_2020, df_geral_2021,
+        df_geral_2022
+    ]
+], ignore_index=True)
+
+# Dados de teste (ano mais recente)
+df_teste = engenharia_de_features(df_geral_2023)
+
+# Treinar com todos os dados anteriores, testar em 2023
+modelo, relatorio = treinar_modelo_final(df_treino, df_teste)
+print(relatorio)
+
+print("Distribuição no treino:")
+print(df_treino['risco_obito'].value_counts())
+
+print("\nDistribuição no teste:")
+print(df_teste['risco_obito'].value_counts())
