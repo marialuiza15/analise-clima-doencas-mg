@@ -58,3 +58,9 @@ df_teste = engenharia_de_features(df_geral_2023)
 # Treinar com todos os dados anteriores, testar em 2023
 modelo, relatorio = treinar_modelo_final(df_treino, df_teste)
 print(relatorio)
+
+print("Distribuição no treino:")
+print(df_treino['risco_obito'].value_counts())
+
+print("\nDistribuição no teste:")
+print(df_teste['risco_obito'].value_counts())
