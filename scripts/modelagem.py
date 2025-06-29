@@ -30,31 +30,42 @@ def treinar_modelos(df):
         print(classification_report(y_test, y_pred))
 
 def treinar_modelo_final(df_treino, df_teste):
-    # Preparação
+    # Ordena por data
     df_treino = df_treino.sort_values('data')
     df_teste = df_teste.sort_values('data')
 
+    # Seleção de features e alvo
     X_train = df_treino[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
     y_train = df_treino['risco_obito']
 
     X_test = df_teste[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
     y_test = df_teste['risco_obito']
 
-    # Encoding
+    # Encoding das features categóricas
     for col in X_train.columns:
         if X_train[col].dtype == 'object' or str(X_train[col].dtype).startswith('category'):
-            le = LabelEncoder()
-            X_train[col] = le.fit_transform(X_train[col].astype(str))
-            X_test[col] = le.transform(X_test[col].astype(str))  # usa mesmo encoder
+            le_feat = LabelEncoder()
+            todos_valores = pd.concat([X_train[col], X_test[col]]).astype(str)
+            le_feat.fit(todos_valores)
+            X_train[col] = le_feat.transform(X_train[col].astype(str))
+            X_test[col] = le_feat.transform(X_test[col].astype(str))
 
+    # Encoding do target
     le_y = LabelEncoder()
-    y_train = le_y.fit_transform(y_train.astype(str))
+    todos_riscos = pd.concat([y_train, y_test]).astype(str)
+    le_y.fit(todos_riscos)
+    y_train = le_y.transform(y_train.astype(str))
     y_test = le_y.transform(y_test.astype(str))
 
-    # Modelo
+    # Treinamento
     modelo = RandomForestClassifier(random_state=42)
     modelo.fit(X_train, y_train)
     y_pred = modelo.predict(X_test)
 
-    relatorio = classification_report(y_test, y_pred, target_names=le_y.classes_)
+    # Relatório com todas as classes previstas
+    relatorio = classification_report(
+        y_test, y_pred,
+        labels=range(len(le_y.classes_)),
+        target_names=le_y.classes_
+    )
     return modelo, relatorio
