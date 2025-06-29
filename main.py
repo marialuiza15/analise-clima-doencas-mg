@@ -41,6 +41,10 @@ df_geral_2023 = unindo_clima_saude(df_clima_2023, CAMINHO_SAUDE, 2023)
 
 # resultado.to_csv("resultado_uniao_2010.csv", index=False, encoding="utf-8") # cCaso precise ver o df completo
 
+#df_features_2010 = engenharia_de_features(df_geral_2010)
+#print(df_features_2010)
+#treinar_modelos(df_features_2010)
+
 # Junta todos os anos anteriores (treino)
 df_treino = pd.concat([
     engenharia_de_features(df_geral_ano)
