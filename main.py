@@ -60,7 +60,7 @@ df_treino = pd.concat([
 df_teste = engenharia_de_features(df_geral_2023)
 
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio = treinar_modelo_final(df_treino, df_teste)
+modelo, relatorio = treinar_modelo_por_doenca(df_treino, df_teste, top_n=5)
 print(relatorio)
 
 print("Distribuição no treino:")
