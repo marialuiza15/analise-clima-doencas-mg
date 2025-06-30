@@ -74,4 +74,4 @@ def treinar_modelo_por_doenca(df_treino, df_teste, top_n=5):
         zero_division=0
     )
 
-    return modelo, relatorio
+    return modelo, relatorio, X_test, y_test_enc, le_y
