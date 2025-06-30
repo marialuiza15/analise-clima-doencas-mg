@@ -1,6 +1,7 @@
 from scripts.limpeza import *
 from scripts.features import *
 from scripts.modelagem import *
+from scripts.visualizacao import plot_distribuicao_causas, mostrar_matriz_confusao, plot_casos_por_mes
 
 CAMINHO_CLIMA = 'dados_clima_mg/'
 CAMINHO_SAUDE = 'dados_saude_mg/'
@@ -59,9 +60,20 @@ df_treino = pd.concat([
 # Dados de teste (ano mais recente)
 df_teste = engenharia_de_features(df_geral_2023)
 
+# Remove registros sem causa válida (target ausente)
+df_treino = df_treino[df_treino['capitulo_cid_causa_basica'] != '#N/D']
+df_treino = df_treino.dropna(subset=['capitulo_cid_causa_basica'])
+df_teste = df_teste[df_teste['capitulo_cid_causa_basica'] != '#N/D']
+df_teste = df_teste.dropna(subset=['capitulo_cid_causa_basica'])
+
+plot_distribuicao_causas(df_treino)
+plot_casos_por_mes(df_treino)
+
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio = treinar_modelo_por_doenca(df_treino, df_teste, top_n=5)
+modelo, relatorio, X_test, y_test_enc, le_y = treinar_modelo_por_doenca(df_treino, df_teste, top_n=5)
 print(relatorio)
+
+mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
 
 print("Distribuição no treino:")
 print(df_treino['risco_obito'].value_counts())
