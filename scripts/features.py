@@ -1,5 +1,22 @@
 import pandas as pd
 
+def classificar_estacao(data):
+    if pd.isna(data):
+        return 'desconhecido'
+
+    mes = data.month
+    dia = data.day
+
+    if (mes == 12 and dia >= 21) or (1 <= mes <= 2) or (mes == 3 and dia < 20):
+        return 'verao'
+    elif (mes == 3 and dia >= 20) or (4 <= mes <= 5) or (mes == 6 and dia < 21):
+        return 'outono'
+    elif (mes == 6 and dia >= 21) or (7 <= mes <= 8) or (mes == 9 and dia < 23):
+        return 'inverno'
+    elif (mes == 9 and dia >= 23) or (10 <= mes <= 11) or (mes == 12 and dia < 21):
+        return 'primavera'
+    return 'desconhecido'
+
 def classificar_temperatura(temp):
     if temp < 0:
         return 'frio_extremo'
@@ -35,6 +52,14 @@ def engenharia_de_features(df):
         df['clima_extremo'] = ((df['TEMPERATURA_MEDIA'] > 35) | (df['TEMPERATURA_MEDIA'] < 0)).astype(int) # Marca 1 para clima extremo e 0 para condições normais.
 
     df['risco_obito'] = 'Desconhecido'
+
+    if 'data' in df.columns:
+        df['estacao_ano'] = pd.to_datetime(df['data'], errors='coerce').apply(classificar_estacao)
+
+    # NOVO: Região como string padronizada
+    if 'Região' in df.columns:
+        df['regiao'] = df['Região'].astype(str).str.lower().str.strip()
+
 
     # Crianças e idosos em calor extremo e muito seco
     cond1 = (df['faixa_etaria'].isin(['<10', '>65'])) & (df['temperatura_classe'] == 'muito_quente') & (df['umidade_classe'] == 'muito_seco')

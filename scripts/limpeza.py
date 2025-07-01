@@ -1,5 +1,6 @@
 import pandas as pd
 import glob
+import unidecode
 import os
 
 def limpar_clima(df):
@@ -45,6 +46,15 @@ def unir_e_separar_clima(caminho_clima):
             continue
         with open(arquivo, encoding='latin1') as f:
             nome_lugar = f.readline().strip().split(':')[1].strip().lower()
+        
+
+        nome_lugar = (
+            unidecode.unidecode(nome_lugar.lower()
+                .replace(' (mg)', '')
+                .replace('-', ' ')
+                .replace('_', ' ')
+                .strip())
+        )
         df = pd.read_csv(arquivo, sep=';', encoding='latin1', header=9)
         df['Região'] = nome_lugar
 
@@ -69,26 +79,29 @@ def unir_e_separar_clima(caminho_clima):
     
     return clima_total, dfs_por_ano
 
-def unindo_clima_saude(df_clima, caminho_saude, ano_especifico):
-    import os
-    dfs_ano = {}
-    for ano in range(2010, 2024):
+def unindo_clima_saude(df_clima_ano, caminho_saude, ano_especifico):
 
-        arquivo_saude = f'dados_cronicas_ses_{ano}.csv'
-        caminho_arquivo_saude = os.path.join(caminho_saude, arquivo_saude)
-        if not os.path.exists(caminho_arquivo_saude):
-            print(f"Arquivo de saúde não encontrado para {ano}")
-            continue
-        df_saude = pd.read_csv(caminho_arquivo_saude, sep=';', encoding='utf-8-sig')
+    arquivo_saude = f'dados_cronicas_ses_{ano_especifico}.csv'
+    caminho_arquivo_saude = os.path.join(caminho_saude, arquivo_saude)
+    
+    if not os.path.exists(caminho_arquivo_saude):
+        print(f"Arquivo de saúde não encontrado para {ano_especifico}")
+        return pd.DataFrame()
 
-        df_clima = df_clima.copy()
-        df_clima['data'] = pd.to_datetime(df_clima['Data Medicao']).dt.date
-        df_clima['Região'] = df_clima['Região'].str.strip().str.lower()
-        df_saude['data'] = pd.to_datetime(df_saude['dt_obito'], dayfirst=True, errors='coerce').dt.date
-        df_saude['Região'] = df_saude['co_municipio_ibge_residencia'].str.strip().str.lower()
+    df_saude = pd.read_csv(caminho_arquivo_saude, sep=';', encoding='utf-8-sig')
+    
+    df_clima_ano = df_clima_ano.copy()
+    df_clima_ano['data'] = pd.to_datetime(df_clima_ano['Data Medicao'], errors='coerce').dt.date
+    df_clima_ano['Região'] = df_clima_ano['Região'].str.strip().str.lower()
 
-        df_merged = pd.merge(df_clima, df_saude, on=['data', 'Região'], how='inner', suffixes=('_clima', '_saude'))
+    df_saude['data'] = pd.to_datetime(df_saude['dt_obito'], dayfirst=True, errors='coerce').dt.date
+    df_saude['Região'] = (
+        df_saude['co_municipio_ibge_residencia']
+        .astype(str)
+        .str.lower()
+        .str.strip()
+        .apply(unidecode.unidecode)
+    )
+    df_merged = pd.merge(df_clima_ano, df_saude, on=['data', 'Região'], how='inner', suffixes=('_clima', '_saude'))
 
-        dfs_ano[ano] = df_merged
-
-    return dfs_ano[ano_especifico]
+    return df_merged

@@ -4,7 +4,7 @@ import seaborn as sns
 from sklearn.metrics import ConfusionMatrixDisplay
 
 def plot_distribuicao_causas(df, titulo='Distribuição das causas de óbito'):
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(5, 2))  # Tamanho reduzido
     ordem = df['capitulo_cid_causa_basica'].value_counts().head(10).index
     sns.countplot(data=df, y='capitulo_cid_causa_basica', order=ordem, hue='capitulo_cid_causa_basica', palette='magma', legend=False)
     plt.title(titulo)
@@ -26,7 +26,7 @@ def mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y):
 
 def plot_casos_por_mes(df):
     df['mes'] = pd.to_datetime(df['data']).dt.month
-    plt.figure(figsize=(12, 4))
+    plt.figure(figsize=(7, 2.5))  # Tamanho reduzido
     sns.countplot(data=df, x='mes', hue='capitulo_cid_causa_basica', palette='Set2')
     plt.title('Óbitos por mês e causa (top 4)')
     plt.xlabel('Mês')

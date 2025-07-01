@@ -3,10 +3,46 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
+import joblib
+
+
+def treinar_modelo_risco_obito(df_treino, df_teste):
+    # Features relevantes
+    X_train = df_treino[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo', 'estacao_ano', 'regiao']].copy()
+    X_test = df_teste[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo', 'estacao_ano', 'regiao']].copy()
+    y_train = df_treino['risco_obito'].astype(str)
+    y_test = df_teste['risco_obito'].astype(str)
+
+    # LabelEncoders por coluna
+    encoders = {}
+    for col in X_train.columns:
+        le = LabelEncoder()
+        X_train[col] = le.fit_transform(X_train[col].astype(str))
+        X_test[col] = le.transform(X_test[col].astype(str))
+        encoders[col] = le
+
+    # Alvo
+    le_y = LabelEncoder()
+    y_train_enc = le_y.fit_transform(y_train)
+    y_test_enc = le_y.transform(y_test)
+
+    # Modelo
+    modelo = RandomForestClassifier(class_weight='balanced', random_state=42)
+    modelo.fit(X_train, y_train_enc)
+
+    # Avaliação
+    y_pred = modelo.predict(X_test)
+    print(classification_report(y_test_enc, y_pred, target_names=le_y.classes_))
+
+    # Salva modelo e encoders
+    joblib.dump(modelo, 'modelo_risco.joblib')
+    joblib.dump(encoders, 'encoders_risco.joblib')
+    joblib.dump(le_y, 'encoder_y_risco.joblib')
+
 
 def treinar_modelos(df):
     df = df.sort_values('data').copy()
-    X = df[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
+    X = df[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo', 'estacao_ano', 'regiao']].copy()
     y = df['risco_obito']
 
     for col in X.columns:
@@ -41,6 +77,10 @@ def treinar_modelo_por_doenca(df_treino, df_teste, top_n=3):
     # Features
     X_train = df_treino[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
     X_test = df_teste[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
+
+    if X_train.empty or X_test.empty:
+        print("Dados insuficientes para treinar/testar.")
+        return None, None, None, None, None
 
     # Alvo
     y_train = df_treino[target_col].astype(str)
