@@ -28,7 +28,7 @@ def plot_casos_por_mes(df):
     df['mes'] = pd.to_datetime(df['data']).dt.month
     plt.figure(figsize=(12, 5))
     sns.countplot(data=df, x='mes', hue='capitulo_cid_causa_basica', palette='Set2')
-    plt.title('Óbitos por mês e causa (top 5)')
+    plt.title('Óbitos por mês e causa (top 4)')
     plt.xlabel('Mês')
     plt.ylabel('Número de óbitos')
     plt.legend(title='Causa')
