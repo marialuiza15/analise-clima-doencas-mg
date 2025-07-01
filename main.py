@@ -1,6 +1,7 @@
 from scripts.limpeza import *
 from scripts.features import *
 from scripts.modelagem import *
+from scripts.visualizacao import plot_distribuicao_causas, mostrar_matriz_confusao, plot_casos_por_mes
 
 CAMINHO_CLIMA = 'dados_clima_mg/'
 CAMINHO_SAUDE = 'dados_saude_mg/'
@@ -41,6 +42,45 @@ df_geral_2023 = unindo_clima_saude(df_clima_2023, CAMINHO_SAUDE, 2023)
 
 # resultado.to_csv("resultado_uniao_2010.csv", index=False, encoding="utf-8") # cCaso precise ver o df completo
 
-df_features_2010 = engenharia_de_features(df_geral_2010)
-print(df_features_2010)
-treinar_modelos(df_features_2010)
+#df_features_2010 = engenharia_de_features(df_geral_2010)
+#print(df_features_2010)
+#treinar_modelos(df_features_2010)
+
+# Junta todos os anos anteriores (treino)
+df_treino = pd.concat([
+    engenharia_de_features(df_geral_ano)
+    for df_geral_ano in [
+        df_geral_2010, df_geral_2011, df_geral_2012, df_geral_2013,
+        df_geral_2014, df_geral_2015, df_geral_2016, df_geral_2017,
+        df_geral_2018, df_geral_2019, df_geral_2020]
+], ignore_index=True)
+
+# Dados de teste (ano mais recente)
+df_teste = pd.concat([
+    engenharia_de_features(df_geral_ano)
+    for df_geral_ano in [
+        df_geral_2021, df_geral_2022, df_geral_2023]
+], ignore_index=True)
+
+# Remove registros sem causa válida (target ausente)
+df_treino = df_treino[df_treino['capitulo_cid_causa_basica'] != '#N/D']
+df_treino = df_treino.dropna(subset=['capitulo_cid_causa_basica'])
+df_teste = df_teste[df_teste['capitulo_cid_causa_basica'] != '#N/D']
+df_teste = df_teste.dropna(subset=['capitulo_cid_causa_basica'])
+
+plot_distribuicao_causas(df_treino)
+plot_casos_por_mes(df_teste)
+
+# Treinar com todos os dados anteriores, testar em 2023
+modelo, relatorio, X_test, y_test_enc, le_y = treinar_modelo_por_doenca(df_treino, df_teste, top_n=3)
+print(relatorio)
+
+mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
+
+print("Classes presentes no treino:", df_treino['capitulo_cid_causa_basica'].value_counts())
+
+#print("Distribuição no treino:")
+#print(df_treino['risco_obito'].value_counts())
+
+#print("\nDistribuição no teste:")
+#print(df_teste['risco_obito'].value_counts())
