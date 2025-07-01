@@ -75,8 +75,7 @@ print(relatorio)
 
 mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
 
-print("Classes usadas (top_n):", list(top_classes))
-print("Classes presentes no teste:", df_treino['capitulo_cid_causa_basica'].value_counts())
+print("Classes presentes no treino:", df_treino['capitulo_cid_causa_basica'].value_counts())
 
 #print("Distribuição no treino:")
 #print(df_treino['risco_obito'].value_counts())
