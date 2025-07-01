@@ -1,7 +1,7 @@
 from scripts.limpeza import *
 from scripts.features import *
 from scripts.modelagem import *
-from scripts.visualizacao import plot_distribuicao_causas, mostrar_matriz_confusao, plot_casos_por_mes
+from scripts.visualizacao import plot_distribuicao_causas, plotar_matriz_confusao, plot_casos_por_mes
 
 CAMINHO_CLIMA = 'dados_clima_mg/'
 CAMINHO_SAUDE = 'dados_saude_mg/'
