@@ -1,3 +1,4 @@
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -5,7 +6,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 def plot_distribuicao_causas(df, titulo='Distribuição das causas de óbito'):
     plt.figure(figsize=(10, 5))
     ordem = df['capitulo_cid_causa_basica'].value_counts().head(10).index
-    sns.countplot(data=df, y='capitulo_cid_causa_basica', order=ordem, palette='magma')
+    sns.countplot(data=df, y='capitulo_cid_causa_basica', order=ordem, hue='capitulo_cid_causa_basica', palette='magma', legend=False)
     plt.title(titulo)
     plt.xlabel('Número de óbitos')
     plt.ylabel('Causa (Capítulo CID)')
