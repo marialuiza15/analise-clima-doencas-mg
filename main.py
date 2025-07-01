@@ -72,7 +72,7 @@ plot_distribuicao_causas(df_treino)
 plot_casos_por_mes(df_teste)
 
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio, X_test, y_test_enc, le_y, top_classes = treinar_modelo_por_doenca(df_treino, df_teste, top_n=4)
+modelo, relatorio, X_test, y_test_enc, le_y = treinar_modelo_por_doenca(df_treino, df_teste, top_n=4)
 print(relatorio)
 
 mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
