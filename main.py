@@ -1,7 +1,7 @@
 from scripts.limpeza import *
 from scripts.features import *
 from scripts.modelagem import *
-from scripts.visualizacao import plot_distribuicao_causas, plotar_matriz_confusao, plot_casos_por_mes
+from scripts.visualizacao import plot_distribuicao_causas, mostrar_matriz_confusao, plot_casos_por_mes
 
 CAMINHO_CLIMA = 'dados_clima_mg/'
 CAMINHO_SAUDE = 'dados_saude_mg/'
@@ -69,33 +69,13 @@ df_teste = df_teste[df_teste['capitulo_cid_causa_basica'] != '#N/D']
 df_teste = df_teste.dropna(subset=['capitulo_cid_causa_basica'])
 
 plot_distribuicao_causas(df_treino)
-plot_casos_por_mes(df_geral_2023)
+plot_casos_por_mes(df_teste)
 
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio, dist, melhores_parametros, encoder = treinar_modelo_com_smote_gridsearch(df_treino, df_teste, top_n=3)
+modelo, relatorio, X_test, y_test_enc, le_y = treinar_modelo_por_doenca(df_treino, df_teste, top_n=6)
+print(relatorio)
 
-print("Melhores parâmetros encontrados:", melhores_parametros)
-print("Distribuição após SMOTE:", dist)
-print("Relatório de classificação:\n", relatorio)
-
-# Testa novamente para obter y_pred
-X_test = df_teste[[col for col in df_teste.columns if col in [
-    'TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo',
-    'temperatura_classe', 'umidade_classe', 'sexo', 'raca_cor',
-    'mes', 'estacao', 'municipio'
-]]].copy()
-
-# Codifica igual ao treino
-for col in X_test.columns:
-    if X_test[col].dtype == 'object' or str(X_test[col].dtype).startswith('category'):
-        X_test[col] = LabelEncoder().fit_transform(X_test[col].astype(str))
-
-y_test = df_teste['capitulo_cid_causa_basica'].astype(str)
-y_test_enc = le_y.transform(y_test)
-y_pred = modelo.predict(X_test)
-
-# Plota
-plotar_matriz_confusao(y_test_enc, y_pred, le_y)
+mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
 
 print("Classes presentes no treino:", df_treino['capitulo_cid_causa_basica'].value_counts())
 
