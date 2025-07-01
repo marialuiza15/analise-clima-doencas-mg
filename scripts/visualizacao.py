@@ -13,23 +13,20 @@ def plot_distribuicao_causas(df, titulo='Distribuição das causas de óbito'):
     plt.tight_layout()
     plt.show()
 
-def plotar_matriz_confusao(y_true, y_pred, encoder, titulo="Matriz de Confusão"):
-    cm = confusion_matrix(y_true, y_pred)
-    labels = encoder.classes_
-
-    plt.figure(figsize=(10, 7))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=labels, yticklabels=labels)
-    plt.xlabel("Previsto")
-    plt.ylabel("Real")
-    plt.title(titulo)
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
+def mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y):
+    ConfusionMatrixDisplay.from_estimator(
+        modelo, X_test, y_test_enc,
+        display_labels=le_y.classes_,
+        xticks_rotation='vertical',
+        cmap='Blues',
+        values_format='d'
+    )
+    plt.title('Matriz de Confusão - Previsão das Causas de Óbito')
     plt.show()
 
 def plot_casos_por_mes(df):
     df['mes'] = pd.to_datetime(df['data']).dt.month
-    plt.figure(figsize=(12, 5))
+    plt.figure(figsize=(12, 4))
     sns.countplot(data=df, x='mes', hue='capitulo_cid_causa_basica', palette='Set2')
     plt.title('Óbitos por mês e causa (top 4)')
     plt.xlabel('Mês')
