@@ -78,7 +78,7 @@ print("Melhores parâmetros encontrados:", melhores_parametros)
 print("Distribuição após SMOTE:", dist)
 print("Relatório de classificação:\n", relatorio)
 
-mostrar_matriz_confusao(modelo, dist, melhores_parametros, encoder)
+plotar_matriz_confusao(y_test_enc, y_pred, le_y)
 
 print("Classes presentes no treino:", df_treino['capitulo_cid_causa_basica'].value_counts())
 
