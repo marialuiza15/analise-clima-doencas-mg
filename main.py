@@ -52,13 +52,15 @@ df_treino = pd.concat([
     for df_geral_ano in [
         df_geral_2010, df_geral_2011, df_geral_2012, df_geral_2013,
         df_geral_2014, df_geral_2015, df_geral_2016, df_geral_2017,
-        df_geral_2018, df_geral_2019, df_geral_2020, df_geral_2021,
-        df_geral_2022
-    ]
+        df_geral_2018, df_geral_2019, df_geral_2020]
 ], ignore_index=True)
 
 # Dados de teste (ano mais recente)
-df_teste = engenharia_de_features(df_geral_2023)
+df_teste = pd.concat([
+    engenharia_de_features(df_geral_ano)
+    for df_geral_ano in [
+        df_geral_2021, df_geral_2022, df_geral_2023]
+], ignore_index=True)
 
 # Remove registros sem causa válida (target ausente)
 df_treino = df_treino[df_treino['capitulo_cid_causa_basica'] != '#N/D']
@@ -70,7 +72,7 @@ plot_distribuicao_causas(df_treino)
 plot_casos_por_mes(df_teste)
 
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio, X_test, y_test_enc, le_y, top_classes = treinar_modelo_por_doenca(df_treino, df_teste, top_n=6)
+modelo, relatorio, X_test, y_test_enc, le_y, top_classes = treinar_modelo_por_doenca(df_treino, df_teste, top_n=4)
 print(relatorio)
 
 mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
