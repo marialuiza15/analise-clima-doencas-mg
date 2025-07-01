@@ -72,10 +72,13 @@ plot_distribuicao_causas(df_treino)
 plot_casos_por_mes(df_teste)
 
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio, X_test, y_test_enc, le_y = treinar_modelo_por_doenca(df_treino, df_teste, top_n=4)
-print(relatorio)
+modelo, relatorio, dist, melhores_parametros, encoder = treinar_modelo_com_smote_gridsearch(df_treino, df_teste, top_n=2)
 
-mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
+print("Melhores parâmetros encontrados:", melhores_parametros)
+print("Distribuição após SMOTE:", dist)
+print("Relatório de classificação:\n", relatorio)
+
+mostrar_matriz_confusao(modelo, dist, melhores_parametros, encoder)
 
 print("Classes presentes no treino:", df_treino['capitulo_cid_causa_basica'].value_counts())
 
