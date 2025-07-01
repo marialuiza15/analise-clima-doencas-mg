@@ -22,7 +22,6 @@ def mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y):
         values_format='d'
     )
     plt.title('Matriz de Confusão - Previsão das Causas de Óbito')
-    plt.tight_layout()
     plt.show()
 
 def plot_casos_por_mes(df):
