@@ -29,7 +29,7 @@ def treinar_modelos(df):
         print(f"\nFold {i+1}")
         print(classification_report(y_test, y_pred))
 
-def treinar_modelo_por_doenca(df_treino, df_teste, top_n=5):
+def treinar_modelo_por_doenca(df_treino, df_teste, top_n=3):
     # Define target
     target_col = 'capitulo_cid_causa_basica'
 
