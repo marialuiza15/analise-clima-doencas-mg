@@ -72,7 +72,7 @@ plot_distribuicao_causas(df_treino)
 plot_casos_por_mes(df_teste)
 
 # Treinar com todos os dados anteriores, testar em 2023
-modelo, relatorio, dist, melhores_parametros, encoder = treinar_modelo_com_smote_gridsearch(df_treino, df_teste, top_n=2)
+modelo, relatorio, dist, melhores_parametros, encoder = treinar_modelo_com_smote_gridsearch(df_treino, df_teste, top_n=3)
 
 print("Melhores parâmetros encontrados:", melhores_parametros)
 print("Distribuição após SMOTE:", dist)
