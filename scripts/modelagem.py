@@ -32,7 +32,7 @@ def treinar_modelos(df):
         print(f"\nFold {i+1}")
         print(classification_report(y_test, y_pred))
 
-def treinar_modelo_com_smote_gridsearch(df_treino, df_teste, target_col='capitulo_cid_causa_basica', top_n):
+def treinar_modelo_com_smote_gridsearch(df_treino, df_teste, target_col='capitulo_cid_causa_basica', top_n=2):
     # Foco nas top N classes
     top_classes = df_treino[target_col].value_counts().nlargest(top_n).index
     df_treino = df_treino[df_treino[target_col].isin(top_classes)]
