@@ -67,7 +67,7 @@ df_teste = df_teste[df_teste['capitulo_cid_causa_basica'] != '#N/D']
 df_teste = df_teste.dropna(subset=['capitulo_cid_causa_basica'])
 
 plot_distribuicao_causas(df_treino)
-plot_casos_por_mes(df_treino)
+plot_casos_por_mes(df_teste)
 
 # Treinar com todos os dados anteriores, testar em 2023
 modelo, relatorio, X_test, y_test_enc, le_y = treinar_modelo_por_doenca(df_treino, df_teste, top_n=5)
@@ -75,8 +75,11 @@ print(relatorio)
 
 mostrar_matriz_confusao(modelo, X_test, y_test_enc, le_y)
 
-print("Distribuição no treino:")
-print(df_treino['risco_obito'].value_counts())
+print("Classes usadas (top_n):", list(top_classes))
+print("Classes presentes no teste:", df_teste['capitulo_cid_causa_basica'].value_counts())
 
-print("\nDistribuição no teste:")
-print(df_teste['risco_obito'].value_counts())
+#print("Distribuição no treino:")
+#print(df_treino['risco_obito'].value_counts())
+
+#print("\nDistribuição no teste:")
+#print(df_teste['risco_obito'].value_counts())
