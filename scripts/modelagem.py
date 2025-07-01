@@ -29,49 +29,35 @@ def treinar_modelos(df):
         print(f"\nFold {i+1}")
         print(classification_report(y_test, y_pred))
 
-def treinar_modelo_por_doenca(df_treino, df_teste, top_n):
-    # Define target
-    target_col = 'capitulo_cid_causa_basica'
+def treinar_modelo_por_doenca(df_treino, df_teste, top_n=5):
+    # Top N classes mais comuns no treino
+    top_classes = df_treino['capitulo_cid_causa_basica'].value_counts().nlargest(top_n).index
 
-    # Mantém apenas as N classes mais frequentes
-    top_categorias = df_treino[target_col].value_counts().nlargest(top_n).index
-    df_treino = df_treino[df_treino[target_col].isin(top_categorias)]
-    df_teste = df_teste[df_teste[target_col].isin(top_categorias)]
+    # Filtra treino e teste para manter só essas classes
+    df_treino = df_treino[df_treino['capitulo_cid_causa_basica'].isin(top_classes)]
+    df_teste = df_teste[df_teste['capitulo_cid_causa_basica'].isin(top_classes)]
 
-    # Features
+    # Features e target
     X_train = df_treino[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
+    y_train = df_treino['capitulo_cid_causa_basica']
+
     X_test = df_teste[['TEMPERATURA_MEDIA', 'UMIDADE_MEDIA', 'faixa_etaria', 'clima_extremo']].copy()
+    y_test = df_teste['capitulo_cid_causa_basica']
 
-    # Alvo
-    y_train = df_treino[target_col].astype(str)
-    y_test = df_teste[target_col].astype(str)
-
-    # LabelEncoder para as features categóricas
-    for col in X_train.columns:
-        if X_train[col].dtype == 'object' or str(X_train[col].dtype).startswith('category'):
-            le_feat = LabelEncoder()
-            todos_valores = pd.concat([X_train[col], X_test[col]]).astype(str)
-            le_feat.fit(todos_valores)
-            X_train[col] = le_feat.transform(X_train[col].astype(str))
-            X_test[col] = le_feat.transform(X_test[col].astype(str))
-
-    # LabelEncoder do target
+    # Codificação
     le_y = LabelEncoder()
-    le_y.fit(pd.concat([y_train, y_test]))
-    y_train_enc = le_y.transform(y_train)
-    y_test_enc = le_y.transform(y_test)
+    y_train_enc = le_y.fit_transform(y_train.astype(str))
+    y_test_enc = le_y.transform(y_test.astype(str))
 
-    # Modelo
-    modelo = RandomForestClassifier(class_weight='balanced', random_state=42)
+    for col in ['faixa_etaria', 'clima_extremo']:
+        le_col = LabelEncoder()
+        X_train[col] = le_col.fit_transform(X_train[col].astype(str))
+        X_test[col] = le_col.transform(X_test[col].astype(str))
+
+    modelo = RandomForestClassifier()
     modelo.fit(X_train, y_train_enc)
     y_pred = modelo.predict(X_test)
 
-    # Relatório
-    relatorio = classification_report(
-        y_test_enc, y_pred,
-        labels=range(len(le_y.classes_)),
-        target_names=le_y.classes_,
-        zero_division=0
-    )
+    relatorio = classification_report(y_test_enc, y_pred, target_names=le_y.classes_)
 
-    return modelo, relatorio, X_test, y_test_enc, le_y
+    return modelo, relatorio, X_test, y_test_enc, le_y, top_classes
